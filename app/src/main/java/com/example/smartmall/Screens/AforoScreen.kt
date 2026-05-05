@@ -20,9 +20,9 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.smartmall.Aforo.Aforo
+import com.example.smartmall.Aforo.AforoCard
 import com.example.smartmall.R
-import com.example.smartmall.Restauracion.Restaurante
-import com.example.smartmall.Restauracion.RestauranteCard
 
 @Composable
 fun AforoScreen(
@@ -35,19 +35,19 @@ fun AforoScreen(
     }
 
     val zonasAforo = listOf(
-        Restaurante("Apple", R.drawable.apple),
-        Restaurante("Bershka", R.drawable.bershka),
-        Restaurante("Besson", R.drawable.besson),
-        Restaurante("Courir", R.drawable.courir),
-        Restaurante("Druni", R.drawable.druni),
-        Restaurante("Fnac", R.drawable.fnac),
-        Restaurante("Hollister", R.drawable.hollister),
-        Restaurante("Kiko", R.drawable.kiko),
-        Restaurante("Lacoste", R.drawable.lacoste),
-        Restaurante("Mango", R.drawable.mango),
-        Restaurante("Pull&Bear", R.drawable.pull),
-        Restaurante("Zara", R.drawable.zara),
-        Restaurante("ZaraHome", R.drawable.zarahome),
+        Aforo("Apple", R.drawable.apple, 42, 80),
+        Aforo("Bershka", R.drawable.bershka, 67, 110),
+        Aforo("Besson", R.drawable.besson, 21, 60),
+        Aforo("Courir", R.drawable.courir, 38, 75),
+        Aforo("Druni", R.drawable.druni, 86, 100),
+        Aforo("Fnac", R.drawable.fnac, 118, 160),
+        Aforo("Hollister", R.drawable.hollister, 74, 120),
+        Aforo("Kiko", R.drawable.kiko, 25, 55),
+        Aforo("Lacoste", R.drawable.lacoste, 31, 70),
+        Aforo("Mango", R.drawable.mango, 92, 140),
+        Aforo("Pull&Bear", R.drawable.pull, 108, 150),
+        Aforo("Zara", R.drawable.zara, 164, 220),
+        Aforo("ZaraHome", R.drawable.zarahome, 49, 90),
     )
 
     val listState = rememberLazyListState()
@@ -105,8 +105,8 @@ fun AforoScreen(
             verticalArrangement = Arrangement.spacedBy(18.dp)
         ) {
             itemsIndexed(zonasAforo) { index, zona ->
-                RestauranteCard(
-                    restaurante = zona,
+                AforoCard(
+                    aforo = zona,
                     highlighted = index == highlightedIndex,
                     onClick = {
                         if (zona.nombre == "Zara") {

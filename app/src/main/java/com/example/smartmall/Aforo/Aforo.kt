@@ -1,4 +1,8 @@
-package com.example.smartmall.Aforo;
+package com.example.smartmall.Aforo
 
-public class Aforo {
-}
+data class Aforo(
+    val nombre: String,
+    val imagen: Int,
+    val personasActuales: Int,
+    val capacidadMaxima: Int
+)
