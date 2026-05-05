@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.sp
 import com.example.smartmall.R
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BeataPastaScreen(onBack: () -> Unit) {
 
@@ -41,12 +42,34 @@ fun BeataPastaScreen(onBack: () -> Unit) {
         onBack()
     }
 
-    var personas by remember { mutableStateOf("2") }
-    var hora by remember { mutableStateOf("21:00") }
+    var personas by remember { mutableStateOf("") }
     var nombre by remember { mutableStateOf("") }
+    var correo by remember { mutableStateOf("") }
+    var fechaReserva by remember { mutableStateOf("") }
+    var horaReserva by remember { mutableStateOf("") }
+    var horasExpanded by remember { mutableStateOf(false) }
     var reservaConfirmada by remember { mutableStateOf(false) }
+    var mensajeError by remember { mutableStateOf("") }
     val listState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
+    val horasReserva = remember {
+        buildList {
+            var hora = 12
+            var minuto = 30
+
+            while (hora < 23 || hora == 23 && minuto == 0) {
+                val horaTexto = hora.toString().padStart(2, '0')
+                val minutoTexto = minuto.toString().padStart(2, '0')
+                add("$horaTexto:$minutoTexto")
+
+                minuto += 15
+                if (minuto >= 60) {
+                    hora++
+                    minuto -= 60
+                }
+            }
+        }
+    }
 
     LazyColumn(
         state = listState,
@@ -130,9 +153,9 @@ fun BeataPastaScreen(onBack: () -> Unit) {
             MenuCategory(
                 title = "Aperitivos",
                 items = listOf(
-                    MenuItem("Pan de ajo", "Pan tostado con ajo, perejil y aceite de oliva", "3,90 EUR"),
-                    MenuItem("Bruschetta", "Tomate, albahaca fresca y mozzarella", "4,50 EUR"),
-                    MenuItem("Provolone al horno", "Queso fundido con tomate y oregano", "6,20 EUR")
+                    MenuItem("Pan de ajo", "Pan tostado con ajo, perejil y aceite de oliva", "3,90 €"),
+                    MenuItem("Bruschetta", "Tomate, albahaca fresca y mozzarella", "4,50 €"),
+                    MenuItem("Provolone al horno", "Queso fundido con tomate y oregano", "6,20 €")
                 )
             )
         }
@@ -143,43 +166,43 @@ fun BeataPastaScreen(onBack: () -> Unit) {
                     MenuSection(
                         title = "Ensaladas",
                         items = listOf(
-                            MenuItem("Ensalada cesar", "Lechuga romana, pollo, parmesano, croutons y salsa cesar", "8,90 EUR"),
-                            MenuItem("Ensalada caprese", "Tomate, mozzarella fresca, albahaca y aceite de oliva", "8,50 EUR"),
-                            MenuItem("Ensalada mixta", "Lechuga, tomate, cebolla, atun, huevo y aceitunas", "7,90 EUR"),
-                            MenuItem("Ensalada de burrata", "Burrata, rucula, tomate cherry y pesto", "10,50 EUR")
+                            MenuItem("Ensalada cesar", "Lechuga romana, pollo, parmesano, croutons y salsa cesar", "8,90 €"),
+                            MenuItem("Ensalada caprese", "Tomate, mozzarella fresca, albahaca y aceite de oliva", "8,50 €"),
+                            MenuItem("Ensalada mixta", "Lechuga, tomate, cebolla, atun, huevo y aceitunas", "7,90 €"),
+                            MenuItem("Ensalada de burrata", "Burrata, rucula, tomate cherry y pesto", "10,50 €")
                         )
                     ),
                     MenuSection(
                         title = "Pizzas",
                         items = listOf(
-                            MenuItem("Pizza margarita", "Tomate, mozzarella y albahaca fresca", "9,90 EUR"),
-                            MenuItem("Pizza prosciutto", "Tomate, mozzarella y jamon cocido", "10,90 EUR"),
-                            MenuItem("Pizza cuatro quesos", "Mozzarella, gorgonzola, parmesano y provolone", "11,50 EUR"),
-                            MenuItem("Pizza pepperoni", "Tomate, mozzarella y pepperoni", "11,20 EUR"),
-                            MenuItem("Pizza barbacoa", "Salsa barbacoa, carne, bacon y mozzarella", "12,00 EUR"),
-                            MenuItem("Pizza carbonara", "Nata, bacon, champinones, cebolla y parmesano", "12,20 EUR"),
-                            MenuItem("Pizza vegetal", "Calabacin, pimiento, cebolla, champinones y aceitunas", "10,90 EUR"),
-                            MenuItem("Pizza diavola", "Salami picante, tomate, mozzarella y guindilla", "11,90 EUR"),
-                            MenuItem("Pizza tonno", "Atun, cebolla, tomate y mozzarella", "11,40 EUR"),
-                            MenuItem("Pizza hawaiana", "Jamon cocido, pina, tomate y mozzarella", "10,90 EUR"),
-                            MenuItem("Pizza trufa", "Crema de trufa, mozzarella, champinones y parmesano", "13,50 EUR")
+                            MenuItem("Pizza margarita", "Tomate, mozzarella y albahaca fresca", "9,90 €"),
+                            MenuItem("Pizza prosciutto", "Tomate, mozzarella y jamon cocido", "10,90 €"),
+                            MenuItem("Pizza cuatro quesos", "Mozzarella, gorgonzola, parmesano y provolone", "11,50 €"),
+                            MenuItem("Pizza pepperoni", "Tomate, mozzarella y pepperoni", "11,20 €"),
+                            MenuItem("Pizza barbacoa", "Salsa barbacoa, carne, bacon y mozzarella", "12,00 €"),
+                            MenuItem("Pizza carbonara", "Nata, bacon, champinones, cebolla y parmesano", "12,20 €"),
+                            MenuItem("Pizza vegetal", "Calabacin, pimiento, cebolla, champinones y aceitunas", "10,90 €"),
+                            MenuItem("Pizza diavola", "Salami picante, tomate, mozzarella y guindilla", "11,90 €"),
+                            MenuItem("Pizza tonno", "Atun, cebolla, tomate y mozzarella", "11,40 €"),
+                            MenuItem("Pizza hawaiana", "Jamon cocido, pina, tomate y mozzarella", "10,90 €"),
+                            MenuItem("Pizza trufa", "Crema de trufa, mozzarella, champinones y parmesano", "13,50 €")
                         )
                     ),
                     MenuSection(
                         title = "Pasta",
                         items = listOf(
-                            MenuItem("Spaghetti carbonara", "Pasta con huevo, bacon y parmesano", "10,90 EUR"),
-                            MenuItem("Tagliatelle bolognesa", "Salsa de tomate, carne y hierbas italianas", "11,50 EUR"),
-                            MenuItem("Penne arrabbiata", "Tomate picante, ajo y aceite de oliva", "9,90 EUR"),
-                            MenuItem("Fettuccine alfredo", "Salsa cremosa de parmesano", "10,80 EUR"),
-                            MenuItem("Ravioli ricotta e spinaci", "Rellenos de ricotta y espinacas con salsa suave", "12,20 EUR"),
-                            MenuItem("Tortellini panna e prosciutto", "Tortellini con nata y jamon", "11,90 EUR"),
-                            MenuItem("Gnocchi al pesto", "Gnocchi de patata con pesto genoves", "10,70 EUR"),
-                            MenuItem("Linguine alle vongole", "Pasta larga con almejas, ajo y perejil", "13,90 EUR"),
-                            MenuItem("Maccheroni cuatro quesos", "Salsa cremosa de quesos italianos", "11,40 EUR"),
-                            MenuItem("Lasagna della casa", "Capas de pasta, carne, bechamel y queso gratinado", "12,50 EUR"),
-                            MenuItem("Spaghetti frutti di mare", "Marisco, tomate, ajo y perejil", "14,20 EUR"),
-                            MenuItem("Rigatoni amatriciana", "Tomate, panceta, cebolla y pecorino", "11,80 EUR")
+                            MenuItem("Spaghetti carbonara", "Pasta con huevo, bacon y parmesano", "10,90 €"),
+                            MenuItem("Tagliatelle bolognesa", "Salsa de tomate, carne y hierbas italianas", "11,50 €"),
+                            MenuItem("Penne arrabbiata", "Tomate picante, ajo y aceite de oliva", "9,90 €"),
+                            MenuItem("Fettuccine alfredo", "Salsa cremosa de parmesano", "10,80 €"),
+                            MenuItem("Ravioli ricotta e spinaci", "Rellenos de ricotta y espinacas con salsa suave", "12,20 €"),
+                            MenuItem("Tortellini panna e prosciutto", "Tortellini con nata y jamon", "11,90 €"),
+                            MenuItem("Gnocchi al pesto", "Gnocchi de patata con pesto genoves", "10,70 €"),
+                            MenuItem("Linguine alle vongole", "Pasta larga con almejas, ajo y perejil", "13,90 €"),
+                            MenuItem("Maccheroni cuatro quesos", "Salsa cremosa de quesos italianos", "11,40 €"),
+                            MenuItem("Lasagna della casa", "Capas de pasta, carne, bechamel y queso gratinado", "12,50 €"),
+                            MenuItem("Spaghetti frutti di mare", "Marisco, tomate, ajo y perejil", "14,20 €"),
+                            MenuItem("Rigatoni amatriciana", "Tomate, panceta, cebolla y pecorino", "11,80 €")
                         )
                     )
                 )
@@ -190,9 +213,9 @@ fun BeataPastaScreen(onBack: () -> Unit) {
             MenuCategory(
                 title = "Postres",
                 items = listOf(
-                    MenuItem("Tiramisu", "Cafe, mascarpone y cacao", "4,90 EUR"),
-                    MenuItem("Panna cotta", "Con coulis de frutos rojos", "4,50 EUR"),
-                    MenuItem("Cannoli siciliano", "Relleno de ricotta dulce", "4,80 EUR")
+                    MenuItem("Tiramisu", "Cafe, mascarpone y cacao", "4,90 €"),
+                    MenuItem("Panna cotta", "Con coulis de frutos rojos", "4,50 €"),
+                    MenuItem("Cannoli siciliano", "Relleno de ricotta dulce", "4,80 €")
                 )
             )
         }
@@ -201,16 +224,16 @@ fun BeataPastaScreen(onBack: () -> Unit) {
             MenuCategory(
                 title = "Bebidas",
                 items = listOf(
-                    MenuItem("Agua mineral", "Botella 50 cl", "1,80 EUR"),
-                    MenuItem("Coca-cola", "Botella 50 cl", "2,80 EUR"),
-                    MenuItem("Coca-cola Cero", "Botella 50 cl", "2,50 EUR"),
-                    MenuItem("Nestea", "Botella 50 cl", "2,80 EUR"),
-                    MenuItem("Fanta de Naranja", "Botella 50 cl", "2,80 EUR"),
-                    MenuItem("Fanta de Limon", "Botella 50 cl", "2,80 EUR"),
-                    MenuItem("Sprite", "Botella 50 cl", "2,80 EUR"),
-                    MenuItem("Mahou", "Botella 50 cl", "3,00 EUR"),
-                    MenuItem("Cerveza italiana", "Peroni bien fria", "3,20 EUR"),
-                    MenuItem("Copa de vino", "Tinto o blanco de la casa", "3,50 EUR")
+                    MenuItem("Agua mineral", "Botella 50 cl", "1,80 €"),
+                    MenuItem("Coca-cola", "Botella 50 cl", "2,80 €"),
+                    MenuItem("Coca-cola Cero", "Botella 50 cl", "2,50 €"),
+                    MenuItem("Nestea", "Botella 50 cl", "2,80 €"),
+                    MenuItem("Fanta de Naranja", "Botella 50 cl", "2,80 €"),
+                    MenuItem("Fanta de Limon", "Botella 50 cl", "2,80 €"),
+                    MenuItem("Sprite", "Botella 50 cl", "2,80 €"),
+                    MenuItem("Mahou", "Botella 50 cl", "3,00 €"),
+                    MenuItem("Cerveza italiana", "Peroni bien fria", "3,20 €"),
+                    MenuItem("Copa de vino", "Tinto o blanco de la casa", "3,50 €")
                 )
             )
         }
@@ -233,6 +256,7 @@ fun BeataPastaScreen(onBack: () -> Unit) {
                         onValueChange = {
                             nombre = it
                             reservaConfirmada = false
+                            mensajeError = ""
                         },
                         label = { Text("Nombre") },
                         modifier = Modifier.fillMaxWidth(),
@@ -240,10 +264,25 @@ fun BeataPastaScreen(onBack: () -> Unit) {
                     )
 
                     OutlinedTextField(
+                        value = correo,
+                        onValueChange = {
+                            correo = it
+                            reservaConfirmada = false
+                            mensajeError = ""
+                        },
+                        label = { Text("Correo electronico") },
+                        placeholder = { Text("Ej: nombre@email.com") },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
+                    )
+
+                    OutlinedTextField(
                         value = personas,
                         onValueChange = {
                             personas = it.filter { caracter -> caracter.isDigit() }
                             reservaConfirmada = false
+                            mensajeError = ""
                         },
                         label = { Text("Numero de personas") },
                         modifier = Modifier.fillMaxWidth(),
@@ -252,28 +291,89 @@ fun BeataPastaScreen(onBack: () -> Unit) {
                     )
 
                     OutlinedTextField(
-                        value = hora,
+                        value = fechaReserva,
                         onValueChange = {
-                            hora = it
+                            fechaReserva = it
                             reservaConfirmada = false
+                            mensajeError = ""
                         },
-                        label = { Text("Hora de la reserva") },
-                        placeholder = { Text("Ej: 21:00") },
+                        label = { Text("Dia de la reserva") },
+                        placeholder = { Text("Ej: 12/05/2026") },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true
                     )
 
+                    ExposedDropdownMenuBox(
+                        expanded = horasExpanded,
+                        onExpandedChange = { horasExpanded = !horasExpanded }
+                    ) {
+                        OutlinedTextField(
+                            value = horaReserva,
+                            onValueChange = {},
+                            readOnly = true,
+                            label = { Text("Hora de la reserva") },
+                            placeholder = { Text("Selecciona una hora") },
+                            trailingIcon = {
+                                ExposedDropdownMenuDefaults.TrailingIcon(expanded = horasExpanded)
+                            },
+                            modifier = Modifier
+                                .menuAnchor()
+                                .fillMaxWidth(),
+                            singleLine = true
+                        )
+
+                        ExposedDropdownMenu(
+                            expanded = horasExpanded,
+                            onDismissRequest = { horasExpanded = false }
+                        ) {
+                            horasReserva.forEach { hora ->
+                                DropdownMenuItem(
+                                    text = { Text(hora) },
+                                    onClick = {
+                                        horaReserva = hora
+                                        horasExpanded = false
+                                        reservaConfirmada = false
+                                        mensajeError = ""
+                                    }
+                                )
+                            }
+                        }
+                    }
+
                     Button(
-                        onClick = { reservaConfirmada = true },
+                        onClick = {
+                            val numeroPersonas = personas.toIntOrNull() ?: 0
+
+                            mensajeError = when {
+                                nombre.isBlank() -> "Introduce tu nombre."
+                                correo.isBlank() -> "Introduce tu correo electronico."
+                                !correo.isValidEmail() -> "Introduce un correo electronico valido."
+                                personas.isBlank() -> "Introduce el numero de personas."
+                                numeroPersonas <= 0 -> "El numero de personas debe ser mayor que 0."
+                                fechaReserva.isBlank() -> "Introduce el dia de la reserva."
+                                horaReserva.isBlank() -> "Selecciona la hora de la reserva."
+                                else -> ""
+                            }
+
+                            reservaConfirmada = mensajeError.isEmpty()
+                        },
                         modifier = Modifier.fillMaxWidth(),
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFB43B2A))
                     ) {
                         Text("Confirmar reserva")
                     }
 
+                    if (mensajeError.isNotEmpty()) {
+                        Text(
+                            text = mensajeError,
+                            color = Color(0xFFB43B2A),
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+
                     if (reservaConfirmada) {
                         Text(
-                            text = "Reserva preparada para $personas personas a las $hora.",
+                            text = "Reserva preparada para $nombre, $personas personas el $fechaReserva a las $horaReserva.",
                             color = Color(0xFF2E7D32),
                             fontWeight = FontWeight.SemiBold
                         )
@@ -381,10 +481,14 @@ private fun FoodMenuCategory(sections: List<MenuSection>) {
             sections.forEach { section ->
                 Text(
                     text = section.title,
-                    color = Color(0xFF6D2C22),
-                    fontSize = 16.sp,
+                    color = Color.White,
+                    fontSize = 17.sp,
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(top = 6.dp)
+                    modifier = Modifier
+                        .padding(top = 8.dp, bottom = 2.dp)
+                        .clip(RoundedCornerShape(50))
+                        .background(Color(0xFFB43B2A))
+                        .padding(horizontal = 14.dp, vertical = 7.dp)
                 )
 
                 section.items.forEach { item ->
@@ -436,3 +540,15 @@ private data class MenuItem(
     val descripcion: String,
     val precio: String
 )
+
+private fun String.isValidEmail(): Boolean {
+    val email = trim()
+    val atIndex = email.indexOf('@')
+    val lastAtIndex = email.lastIndexOf('@')
+    val dotAfterAt = email.indexOf('.', startIndex = atIndex + 1)
+
+    return atIndex > 0 &&
+        atIndex == lastAtIndex &&
+        dotAfterAt > atIndex + 1 &&
+        dotAfterAt < email.lastIndex
+}
