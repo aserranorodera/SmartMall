@@ -15,6 +15,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -33,6 +34,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.smartmall.R
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
+import java.util.TimeZone
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -46,28 +51,72 @@ fun BeataPastaScreen(onBack: () -> Unit) {
     var nombre by remember { mutableStateOf("") }
     var correo by remember { mutableStateOf("") }
     var fechaReserva by remember { mutableStateOf("") }
+    var fechaReservaMillis by remember { mutableStateOf<Long?>(null) }
+    var mostrarDatePicker by remember { mutableStateOf(false) }
     var horaReserva by remember { mutableStateOf("") }
     var horasExpanded by remember { mutableStateOf(false) }
     var reservaConfirmada by remember { mutableStateOf(false) }
     var mensajeError by remember { mutableStateOf("") }
     val listState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
+    val hoyUtcMillis = remember { todayStartUtcMillis() }
+    val datePickerState = rememberDatePickerState(
+        initialSelectedDateMillis = fechaReservaMillis,
+        selectableDates = object : SelectableDates {
+            override fun isSelectableDate(utcTimeMillis: Long): Boolean {
+                return utcTimeMillis >= hoyUtcMillis
+            }
+
+            override fun isSelectableYear(year: Int): Boolean {
+                return year >= Calendar.getInstance().get(Calendar.YEAR)
+            }
+        }
+    )
     val horasReserva = remember {
-        buildList {
-            var hora = 12
-            var minuto = 30
+        buildReservationHours()
+    }
+    val horasDisponibles = remember(fechaReservaMillis) {
+        availableReservationHours(
+            selectedDateMillis = fechaReservaMillis,
+            hours = horasReserva,
+            todayUtcMillis = hoyUtcMillis
+        )
+    }
 
-            while (hora < 23 || hora == 23 && minuto == 0) {
-                val horaTexto = hora.toString().padStart(2, '0')
-                val minutoTexto = minuto.toString().padStart(2, '0')
-                add("$horaTexto:$minutoTexto")
+    LaunchedEffect(horasDisponibles) {
+        if (horaReserva.isNotEmpty() && horaReserva !in horasDisponibles) {
+            horaReserva = ""
+        }
+    }
 
-                minuto += 15
-                if (minuto >= 60) {
-                    hora++
-                    minuto -= 60
+    if (mostrarDatePicker) {
+        DatePickerDialog(
+            onDismissRequest = { mostrarDatePicker = false },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        datePickerState.selectedDateMillis?.let { selectedMillis ->
+                            fechaReservaMillis = selectedMillis
+                            fechaReserva = selectedMillis.formatReservationDate()
+                            reservaConfirmada = false
+                            mensajeError = ""
+                        }
+
+                        mostrarDatePicker = false
+                    }
+                ) {
+                    Text("Aceptar")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { mostrarDatePicker = false }
+                ) {
+                    Text("Cancelar")
                 }
             }
+        ) {
+            DatePicker(state = datePickerState)
         }
     }
 
@@ -290,29 +339,46 @@ fun BeataPastaScreen(onBack: () -> Unit) {
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                     )
 
-                    OutlinedTextField(
-                        value = fechaReserva,
-                        onValueChange = {
-                            fechaReserva = it
-                            reservaConfirmada = false
-                            mensajeError = ""
-                        },
-                        label = { Text("Dia de la reserva") },
-                        placeholder = { Text("Ej: 12/05/2026") },
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true
-                    )
+                    Box {
+                        OutlinedTextField(
+                            value = fechaReserva,
+                            onValueChange = {},
+                            readOnly = true,
+                            label = { Text("Dia de la reserva") },
+                            placeholder = { Text("Selecciona un dia") },
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true
+                        )
+
+                        Box(
+                            modifier = Modifier
+                                .matchParentSize()
+                                .clickable { mostrarDatePicker = true }
+                        )
+                    }
 
                     ExposedDropdownMenuBox(
                         expanded = horasExpanded,
-                        onExpandedChange = { horasExpanded = !horasExpanded }
+                        onExpandedChange = {
+                            if (horasDisponibles.isNotEmpty()) {
+                                horasExpanded = !horasExpanded
+                            }
+                        }
                     ) {
                         OutlinedTextField(
                             value = horaReserva,
                             onValueChange = {},
                             readOnly = true,
                             label = { Text("Hora de la reserva") },
-                            placeholder = { Text("Selecciona una hora") },
+                            placeholder = {
+                                Text(
+                                    if (horasDisponibles.isEmpty()) {
+                                        "No hay horas disponibles"
+                                    } else {
+                                        "Selecciona una hora"
+                                    }
+                                )
+                            },
                             trailingIcon = {
                                 ExposedDropdownMenuDefaults.TrailingIcon(expanded = horasExpanded)
                             },
@@ -326,7 +392,7 @@ fun BeataPastaScreen(onBack: () -> Unit) {
                             expanded = horasExpanded,
                             onDismissRequest = { horasExpanded = false }
                         ) {
-                            horasReserva.forEach { hora ->
+                            horasDisponibles.forEach { hora ->
                                 DropdownMenuItem(
                                     text = { Text(hora) },
                                     onClick = {
@@ -351,6 +417,7 @@ fun BeataPastaScreen(onBack: () -> Unit) {
                                 personas.isBlank() -> "Introduce el numero de personas."
                                 numeroPersonas <= 0 -> "El numero de personas debe ser mayor que 0."
                                 fechaReserva.isBlank() -> "Introduce el dia de la reserva."
+                                horasDisponibles.isEmpty() -> "No quedan horas disponibles para ese dia."
                                 horaReserva.isBlank() -> "Selecciona la hora de la reserva."
                                 else -> ""
                             }
@@ -551,4 +618,71 @@ private fun String.isValidEmail(): Boolean {
         atIndex == lastAtIndex &&
         dotAfterAt > atIndex + 1 &&
         dotAfterAt < email.lastIndex
+}
+
+private fun todayStartUtcMillis(): Long {
+    val localToday = Calendar.getInstance()
+    val utcToday = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
+
+    utcToday.set(
+        localToday.get(Calendar.YEAR),
+        localToday.get(Calendar.MONTH),
+        localToday.get(Calendar.DAY_OF_MONTH),
+        0,
+        0,
+        0
+    )
+    utcToday.set(Calendar.MILLISECOND, 0)
+
+    return utcToday.timeInMillis
+}
+
+private fun buildReservationHours(): List<String> {
+    return buildList {
+        var hora = 12
+        var minuto = 30
+
+        while (hora < 23 || hora == 23 && minuto == 0) {
+            val horaTexto = hora.toString().padStart(2, '0')
+            val minutoTexto = minuto.toString().padStart(2, '0')
+            add("$horaTexto:$minutoTexto")
+
+            minuto += 15
+            if (minuto >= 60) {
+                hora++
+                minuto -= 60
+            }
+        }
+    }
+}
+
+private fun availableReservationHours(
+    selectedDateMillis: Long?,
+    hours: List<String>,
+    todayUtcMillis: Long
+): List<String> {
+    if (selectedDateMillis == null || selectedDateMillis > todayUtcMillis) {
+        return hours
+    }
+
+    val now = Calendar.getInstance()
+    val currentMinutes = now.get(Calendar.HOUR_OF_DAY) * 60 + now.get(Calendar.MINUTE)
+
+    return hours.filter { hour ->
+        hour.toMinutesOfDay() >= currentMinutes
+    }
+}
+
+private fun String.toMinutesOfDay(): Int {
+    val parts = split(":")
+    val hours = parts.getOrNull(0)?.toIntOrNull() ?: 0
+    val minutes = parts.getOrNull(1)?.toIntOrNull() ?: 0
+
+    return hours * 60 + minutes
+}
+
+private fun Long.formatReservationDate(): String {
+    return SimpleDateFormat("dd/MM/yyyy", Locale("es", "ES")).apply {
+        timeZone = TimeZone.getTimeZone("UTC")
+    }.format(this)
 }
