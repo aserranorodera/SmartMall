@@ -29,6 +29,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.smartmall.Components.HomeCard
 import com.example.smartmall.Parking.SensorCard
 import com.example.smartmall.R
 
@@ -115,18 +116,18 @@ fun HomeScreen(
 
         Spacer(modifier = Modifier.height(if (searchResults.isEmpty()) 46.dp else 18.dp))
 
-        SensorCard(
-            text = "Parking",
-            subtitle = "Ver disponibilidad",
-            imageRes = R.drawable.parking,
-            animationDelayMillis = 120
-        ) {
-            onNavigateToParking()
-        }
+            HomeCard(
+                text = "Parking",
+                subtitle = "Ver disponibilidad",
+                imageRes = R.drawable.parking,
+                animationDelayMillis = 120
+            ) {
+                onNavigateToParking()
+            }
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        SensorCard(
+        HomeCard (
             text = "Aforo",
             subtitle = "Estado en tiempo real",
             imageRes = R.drawable.aforo,
@@ -137,7 +138,7 @@ fun HomeScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        SensorCard(
+        HomeCard(
             text = "Restauración",
             subtitle = "Explorar opciones",
             imageRes = R.drawable.restaurante,

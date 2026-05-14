@@ -14,6 +14,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -24,18 +26,23 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.smartmall.Aforo.AforoViewModel
 import com.example.smartmall.R
 
 @Composable
-fun ZaraScreen(onBack: () -> Unit) {
+fun ZaraScreen(
+    onBack: () -> Unit,
+    viewModel: AforoViewModel = viewModel()
+) {
+    BackHandler { onBack() }
 
-    BackHandler {
-        onBack()
-    }
+    val zonasAforo by viewModel.zonasAforo.collectAsState()
+    val zara = zonasAforo.find { it.nombre == "Zara" }
 
     PantallaAforoZara(
-        aforoActual = 45,
-        capacidadMaxima = 120,
+        aforoActual = zara?.personasActuales ?: 0,
+        capacidadMaxima = zara?.capacidadMaxima ?: 300,
         horario = "L-S: 10:00 - 22:00 / D: 11:00 - 21:00",
         telefono = "912 345 678",
         onBack = onBack
@@ -172,30 +179,12 @@ fun InfoItem(
     valor: String,
     contentColor: Color = Color.DarkGray
 ) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            tint = contentColor
-        )
-
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Icon(imageVector = icon, contentDescription = null, tint = contentColor)
         Spacer(modifier = Modifier.width(12.dp))
-
         Column {
-            Text(
-                text = titulo,
-                fontSize = 14.sp,
-                color = contentColor.copy(alpha = 0.68f)
-            )
-
-            Text(
-                text = valor,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Medium,
-                color = contentColor
-            )
+            Text(text = titulo, fontSize = 14.sp, color = contentColor.copy(alpha = 0.68f))
+            Text(text = valor, fontSize = 16.sp, fontWeight = FontWeight.Medium, color = contentColor)
         }
     }
 }
@@ -207,39 +196,18 @@ fun InfoItem(
     valor: String,
     contentColor: Color = Color.DarkGray
 ) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = iconText,
-            color = contentColor,
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.width(24.dp)
-        )
-
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Text(text = iconText, color = contentColor, fontSize = 20.sp, fontWeight = FontWeight.Bold, modifier = Modifier.width(24.dp))
         Spacer(modifier = Modifier.width(12.dp))
-
         Column {
-            Text(
-                text = titulo,
-                fontSize = 14.sp,
-                color = contentColor.copy(alpha = 0.68f)
-            )
-
-            Text(
-                text = valor,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Medium,
-                color = contentColor
-            )
+            Text(text = titulo, fontSize = 14.sp, color = contentColor.copy(alpha = 0.68f))
+            Text(text = valor, fontSize = 16.sp, fontWeight = FontWeight.Medium, color = contentColor)
         }
     }
 }
 
 fun obtenerColorOcupacion(aforo: Int, capacidadMaxima: Int): Color {
     val porcentaje = aforo.toFloat() / capacidadMaxima.toFloat()
-
     return when {
         porcentaje < 0.5f -> Color(0xFF2E7D32)
         porcentaje < 0.8f -> Color(0xFFF57C00)

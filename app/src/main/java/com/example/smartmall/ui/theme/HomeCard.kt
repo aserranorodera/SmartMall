@@ -1,4 +1,4 @@
-package com.example.smartmall.Parking
+package com.example.smartmall.Components
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -30,11 +30,10 @@ import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
 
 @Composable
-fun SensorCard(
+fun HomeCard(
     text: String,
     subtitle: String,
     imageRes: Int,
-    ocupada: Boolean,
     animationDelayMillis: Int = 0,
     onClick: () -> Unit
 ) {
@@ -66,17 +65,10 @@ fun SensorCard(
     }
 
 
-    val gradientColors = if (ocupada) {
-        listOf(
-            Color(0xFF8F2E2E),
-            Color(0xFFE05252)
-        )
-    } else {
-        listOf(
-            Color(0xFF2E8F5E),
-            Color(0xFF52E0A3)
-        )
-    }
+    val gradientColors = listOf(
+        Color(0xFF1E3C72),
+        Color(0xFF2A5298)
+    )
 
     Box(
         modifier = Modifier
@@ -107,6 +99,7 @@ fun SensorCard(
                 indication = LocalIndication.current
             ) { onClick() }
     ) {
+
 
         Box(
             modifier = Modifier
