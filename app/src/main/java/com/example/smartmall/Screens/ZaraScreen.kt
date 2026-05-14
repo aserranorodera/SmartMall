@@ -65,7 +65,7 @@ fun PantallaAforoZara(
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             Image(
-                painter = painterResource(R.drawable.fondodelmain),
+                painter = painterResource(R.drawable.fondoblanco),
                 contentDescription = "Fondo Zara",
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop
@@ -77,9 +77,9 @@ fun PantallaAforoZara(
                     .background(
                         Brush.verticalGradient(
                             listOf(
-                                Color.Black.copy(alpha = 0.30f),
-                                Color.Black.copy(alpha = 0.50f),
-                                Color.Black.copy(alpha = 0.76f)
+                                Color.Black.copy(alpha = 0.05f),
+                                Color.Black.copy(alpha = 0.20f),
+                                Color.Black.copy(alpha = 0.66f)
                             )
                         )
                     )
@@ -101,13 +101,13 @@ fun PantallaAforoZara(
                         Icon(
                             imageVector = Icons.AutoMirrored.Default.ArrowBack,
                             contentDescription = "Volver",
-                            tint = Color.White
+                            tint = Color.DarkGray
                         )
                     }
 
                     Text(
                         text = "ZARA",
-                        color = Color.White,
+                        color = Color.DarkGray,
                         fontSize = 30.sp,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.align(Alignment.Center)
@@ -138,7 +138,7 @@ fun PantallaAforoZara(
                     Text(
                         text = "Aforo de Personas",
                         fontSize = 18.sp,
-                        color = Color.White.copy(alpha = 0.86f)
+                        color = Color.White
                     )
                 }
 
