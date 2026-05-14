@@ -65,7 +65,7 @@ fun PantallaAforoZara(
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             Image(
-                painter = painterResource(R.drawable.fondodelmain),
+                painter = painterResource(R.drawable.fondoblanco),
                 contentDescription = "Fondo Zara",
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop
